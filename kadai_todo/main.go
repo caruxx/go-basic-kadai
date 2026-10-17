@@ -35,8 +35,12 @@ func main() {
 	printTodos(todos)
 	fmt.Println()
 
-	todos[0].Complete()
-	todos[1].Complete()
+	// IDが1・2のToDoアイテムを完了状態に更新
+	for i := range todos {
+		if todos[i].ID == 1 || todos[i].ID == 2 {
+			todos[i].Complete()
+		}
+	}
 	fmt.Println()
 
 	fmt.Println("--- ToDoリスト（最終状態） ---")
