@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -23,7 +22,7 @@ func loadDiary() ([]Entry, error) {
 	data, err := os.ReadFile(diaryFile)
 	if err != nil {
 		// ファイルがまだない初回は、空の一覧から始める
-		if errors.Is(err, os.ErrNotExist) {
+		if os.IsNotExist(err) {
 			return []Entry{}, nil
 		}
 		// それ以外の読み込みエラーは0件扱いにせず、エラーとして返す
@@ -40,8 +39,8 @@ func loadDiary() ([]Entry, error) {
 
 // saveDiary は日記の一覧全体をJSONにしてファイルへ保存する
 func saveDiary(entries []Entry) error {
-	// 人が読んでも分かりやすいように、インデント付きのJSONにする
-	data, err := json.MarshalIndent(entries, "", "  ")
+	// 一覧全体をJSON（インデントなしの1行）に変換する
+	data, err := json.Marshal(entries)
 	if err != nil {
 		return err
 	}
@@ -105,11 +104,15 @@ func main() {
 			return
 		}
 
+		// 見出しは一覧の先頭に1回だけ表示する
+		fmt.Println("--- 日記データ —")
+
 		// 1件ずつ、日時・タイトル・本文を表示する
-		for i, e := range entries {
-			fmt.Printf("[%d] %s\n", i+1, e.Timestamp.Format("2006-01-02 15:04:05"))
-			fmt.Println("タイトル:", e.Title)
-			fmt.Println("本文:", e.Content)
+		for _, e := range entries {
+			fmt.Println("日時：" + e.Timestamp.Format("2006-01-02 15:04:05"))
+			fmt.Println("タイトル：" + e.Title)
+			fmt.Println("本文：")
+			fmt.Println(e.Content)
 			fmt.Println()
 		}
 
